@@ -1,6 +1,5 @@
 package com.andedit.badtrucks.world;
 
-import static com.andedit.badtrucks.handles.Shaders.shader;
 import static com.badlogic.gdx.math.Interpolation.smooth;
 import static com.badlogic.gdx.math.MathUtils.floor;
 
@@ -14,7 +13,7 @@ import com.badlogic.gdx.utils.Disposable;
 public class World implements Disposable
 {
 	/** The size of the chunks */
-	public static final int SIZE = 16;
+	public static final int SIZE = 8;
 	public static final int LENGTH = SIZE*Chunk.SIZE;
 	
 	public final Chunk[][] chunks;

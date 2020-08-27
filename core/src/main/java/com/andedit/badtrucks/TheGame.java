@@ -4,6 +4,7 @@ import com.andedit.badtrucks.handles.Cam3D;
 import com.andedit.badtrucks.utils.Camera;
 import com.andedit.badtrucks.utils.Util;
 import com.andedit.badtrucks.world.World;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 
 /** First screen of the application. Displayed after the application is created. */
@@ -38,5 +39,15 @@ public class TheGame extends ScreenAdapter
 	@Override
 	public void dispose() {
 		world.dispose();
+	}
+	
+	@Override
+	public void show() {
+		Gdx.input.setCursorCatched(true);
+	}
+	
+	@Override
+	public void hide() {
+		Gdx.input.setCursorCatched(false);
 	}
 }

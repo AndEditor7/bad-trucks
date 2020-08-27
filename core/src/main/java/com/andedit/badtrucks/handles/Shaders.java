@@ -20,7 +20,7 @@ public final class Shaders
 	}
 	
 	public static void getShader(AssetManager asset) {
-		shader = asset.get("shaders/terrain", ShaderProgram.class);
+		shader = asset.get("shaders/terrain.vert", ShaderProgram.class);
 		locations = Util.locateAttributes(shader, TerrainVert.attributes);
 	}
 }

@@ -76,7 +76,6 @@ public class Main extends Game
 	public void dispose() {
 		manu.dispose();
 		game.dispose();
-		screen.dispose();
 		asset.dispose();
 	}
 	
@@ -97,7 +96,7 @@ public class Main extends Game
 		asset = new AssetManager(resolver);
 		asset.setLoader(ShaderProgram.class, new ShaderProgramLoader(resolver));
 		
-		asset.load("shaders/terrain", ShaderProgram.class);
+		asset.load("shaders/terrain.vert", ShaderProgram.class);
 	}
 	
 	private void getAssets() {
