@@ -5,6 +5,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Plane;
+import com.badlogic.gdx.math.Plane.PlaneSide;
 import com.badlogic.gdx.utils.Disposable;
 
 /** A useful utilities for this game and LibGDX. */

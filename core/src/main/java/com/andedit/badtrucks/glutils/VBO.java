@@ -20,9 +20,9 @@ public final class VBO implements Vertex
 	private final ByteBuffer byteBuffer;
 	private int bufferHandle = -1;
 
-	public VBO(final FloatArray array, final VertContext context) {
+	public VBO(final FloatArray array, int numVerts, final VertContext context) {
 		this.context = context;
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * (array.size/context.getAttrsSize()));
+		byteBuffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * numVerts);
 		buffer = byteBuffer.asFloatBuffer();
 		
 		BufferUtils.copy(array.items, byteBuffer, array.size, 0);
@@ -49,8 +49,6 @@ public final class VBO implements Vertex
 		}
 	}
 	
-	/** Unbinds this VertexBufferObject.
-	 * @param shader the shader */
 	@Override
 	public void unbind() {
 		final VertexAttributes attributes = context.getAttrs();
@@ -80,7 +78,6 @@ public final class VBO implements Vertex
 		return bufferHandle != -1;
 	}
 
-	/** Disposes of all resources this VertexBufferObject uses. */
 	@Override
 	public void dispose () {
 		if (isUploaded()) gl.glDeleteBuffer(bufferHandle);

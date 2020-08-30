@@ -1,8 +1,4 @@
-#version 100 
-#ifdef GL_ES
-precision mediump float;
-#endif
-
+#version 100
 attribute vec4 a_position;
 attribute vec4 a_color;
 

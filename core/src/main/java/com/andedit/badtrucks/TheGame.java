@@ -19,7 +19,9 @@ public class TheGame extends ScreenAdapter
 	
 	public TheGame(final Main main) {
 		this.main = main;
-		cam = new Camera(70f, Util.screen.w, Util.screen.h);
+		cam = new Camera(70f, Util.world.w, Util.world.h);
+		cam.near = 1f;
+		cam.far  = 1024f;
 		handle = new Cam3D(cam);
 		world = new World();
 	}

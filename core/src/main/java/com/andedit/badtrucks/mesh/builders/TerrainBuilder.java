@@ -22,17 +22,15 @@ public class TerrainBuilder extends MeshBuilder
 	};
 	
 	/*
+	v1.pos.set(x+1, y, z);
+	v2.pos.set(x, y, z);
+	v3.pos.set(x, y, z+1);
+	v4.pos.set(x+1, y, z+1);
 	
-	createVertex(vec3(1f, 0f, 1f)); v1
-	createVertex(vec3(1f, 0f, 0f)); v2
-	createVertex(vec3(0f, 0f, 1f)); v3
-	createVertex(vec3(0f, 0f, 0f)); v4
-	
-		v2----v1
+		v1----v4  // new
 		|      |
 		|      |
-		v4----v3
-	
+		v2----v3
 	*/
 	public void rect(VertInfo v1, VertInfo v2, VertInfo v3, VertInfo v4) {
 		vertexs.add(v1.x, v1.y, v1.z, v1.c);
@@ -43,13 +41,18 @@ public class TerrainBuilder extends MeshBuilder
 	
 	@Override
 	public ChunkMesh create() {
-		if (!isBuilding) return null;
-		isBuilding = false;
 		return new ChunkMesh(vertexs, context);
 	}
 	
 	public static class VertInfo {
 		public float x, y, z;
 		public float c;
+		
+		public void set(final VertInfo vert) {
+			x = vert.x;
+			y = vert.y;
+			z = vert.z;
+			c = vert.c;
+		}
 	}
 }

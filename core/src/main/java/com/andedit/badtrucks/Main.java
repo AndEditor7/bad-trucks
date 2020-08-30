@@ -82,7 +82,8 @@ public class Main extends Game
 	private void OpenGL() {
 		final GL20 gl = Gdx.gl;
 		
-        gl.glClearColor(0.45f, 0.60f, 0.94f, 1);
+        //gl.glClearColor(0.45f, 0.60f, 0.94f, 1);
+        gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
 		
 		gl.glLineWidth(2);
 		

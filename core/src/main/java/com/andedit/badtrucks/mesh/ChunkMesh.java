@@ -15,13 +15,13 @@ public class ChunkMesh implements Disposable
 	private final int count;
 	
 	public ChunkMesh(FloatArray verts, VertContext context) {
-		vertex = new VBO(verts, context);
-		count = verts.size/Float.BYTES;
+		count = (verts.size / context.getAttrs().vertexSize) * 6;
+		vertex = new VBO(verts, verts.size/context.getAttrsSize(), context);
 	}
 	
 	public void render() {
 		vertex.bind();
-		Gdx.gl.glDrawArrays(GL20.GL_TRIANGLE_STRIP, 0, count);
+		Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, count, GL20.GL_UNSIGNED_SHORT, 0);
 		vertex.unbind();
 	}
 

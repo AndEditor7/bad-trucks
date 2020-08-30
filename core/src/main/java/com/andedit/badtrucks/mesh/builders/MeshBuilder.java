@@ -8,12 +8,7 @@ public abstract class MeshBuilder
 {
 	protected final FloatArray vertexs = new FloatArray(64);
 	
-	/** Is MeshBuilder building. */
-	protected boolean isBuilding;
-	
 	public void begin() {
-		if (isBuilding) return;
-		isBuilding = true;
 		vertexs.clear();
 	}
 	
