@@ -13,7 +13,7 @@ varying vec2 v_texCoords;
 void main()
 {
 	//v_color = a_color;
-	v_light = max(dot(a_normal, u_lightDir), 0.0);
+	v_light = max(dot(a_normal, u_lightDir), 0.2);
 	v_texCoords = vec2(a_position.x, a_position.z) / 16.0;
 	gl_Position = u_projTrans * a_position;
 }

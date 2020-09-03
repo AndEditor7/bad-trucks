@@ -71,6 +71,11 @@ public class Chunk implements Disposable
 				v3.yPos = world.getHeight(realX, realZ+lod);
 				v4.yPos = world.getHeight(realX+lod, realZ+lod);
 				
+				v1.setNor(calcNormals(world, realX+lod, realZ));
+				v2.setNor(calcNormals(world, realX, realZ));
+				v3.setNor(calcNormals(world, realX, realZ+lod));
+				v4.setNor(calcNormals(world, realX+lod, realZ+lod));
+				
 				if (i == 0) { // Build a bounding box for frustum.
 					max = Math.max(v2.yPos, max);
 					min = Math.min(v2.yPos, min);
@@ -208,7 +213,7 @@ public class Chunk implements Disposable
 	private static final Vector3 temNor = new Vector3();
 	private static Vector3 calcNormals(World world, int x, int z) {
 		return temNor.set(world.getHeight(x-1, z)-world.getHeight(x+1, z), 2f, 
-						  world.getHeight(x, z-1)-world.getHeight(x, z+1)).nor();
+						  world.getHeight(x, z-1)-world.getHeight(x, z+1)).nor().scl(-1f);
 	}
 	
 	private static final ExpOut exp = new ExpOut(2, 2.2f);

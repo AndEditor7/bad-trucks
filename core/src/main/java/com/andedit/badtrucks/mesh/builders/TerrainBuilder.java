@@ -6,6 +6,7 @@ import com.andedit.badtrucks.mesh.ChunkMesh;
 import com.andedit.badtrucks.mesh.verts.TerrainVert;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector3;
 
 public class TerrainBuilder extends MeshBuilder
 {
@@ -64,6 +65,12 @@ public class TerrainBuilder extends MeshBuilder
 			yNor = vert.yNor;
 			zNor = vert.zNor;
 			//c = vert.c;
+		}
+		
+		public void setNor(Vector3 nor) {
+			xNor = nor.x;
+			yNor = nor.y;
+			zNor = nor.z;
 		}
 	}
 }

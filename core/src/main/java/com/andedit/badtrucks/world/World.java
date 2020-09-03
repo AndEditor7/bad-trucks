@@ -20,7 +20,7 @@ import com.badlogic.gdx.utils.Disposable;
 public class World implements Disposable
 {
 	/** The size of the chunks */
-	public static final int SIZE = 16;
+	public static final int SIZE = 32;
 	public static final int LENGTH = SIZE*Chunk.SIZE;
 	public static final int MASK = SIZE-1;
 	
@@ -36,10 +36,11 @@ public class World implements Disposable
 		this.chunks = new Chunk[SIZE][SIZE];
 		this.map = new float[LENGTH][LENGTH];
 		
+		final int seed1 = MathUtils.random.nextInt(), seed2 = MathUtils.random.nextInt();
 		for (int x = 0; x < LENGTH; x++)
 		for (int z = 0; z < LENGTH; z++) {
-			map[x][z] =  FastNoise.getPerlin(1337, 0.06f*x, 0.06f*z)*6f; // 7f
-			map[x][z] += FastNoise.getPerlin(2345, 0.015f*x, 0.015f*z)*20f; // 20f
+			map[x][z] =  FastNoise.getPerlin(seed1, 0.06f*x, 0.06f*z)*4f; // 7f
+			map[x][z] += FastNoise.getPerlin(seed2, 0.015f*x, 0.015f*z)*42f; // 24f
 		}
 		
 		for (int x = 0; x < SIZE; x++)

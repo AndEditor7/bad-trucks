@@ -1,6 +1,6 @@
 package com.andedit.badtrucks.utils;
 
-import static com.badlogic.gdx.math.Interpolation.smooth;
+import static com.badlogic.gdx.math.Interpolation.smoother;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -33,8 +33,8 @@ public final class FastNoise {
 		final int y1 = y0 + 1;
 
 		final float xs, ys;
-		xs = smooth.apply(x - x0);
-		ys = smooth.apply(y - y0);
+		xs = smoother.apply(x - x0);
+		ys = smoother.apply(y - y0);
 
 		final float xd0 = x - x0;
 		final float yd0 = y - y0;

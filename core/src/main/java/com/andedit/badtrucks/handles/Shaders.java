@@ -17,13 +17,13 @@ public final class Shaders
 	public static ShaderProgram shader;
 	public static int[] locations;
 	
-	private static final Vector3 noam = new Vector3();
-	
 	public static void bind(Camera cam) {
 		shader.bind();
 		shader.setUniformMatrix(projTran, cam.combined);
+		//shader.setUniformf("u_lightDir", noam.set(cam.direction));
 		if (Gdx.input.isKeyJustPressed(Keys.P)) {
-			shader.setUniformf("u_lightDir", noam.set(cam.direction));
+			shader.setUniformf("u_lightDir", cam.direction);
+			System.out.println("testing");
 		}
 	}
 	
