@@ -16,7 +16,7 @@ public class ChunkMesh implements Disposable
 	
 	public ChunkMesh(FloatArray verts, VertContext context) {
 		count = (verts.size / context.getAttrs().vertexSize) * 6;
-		vertex = new VBO(verts, verts.size/context.getAttrsSize(), context);
+		vertex = new VBO(verts, context);
 	}
 	
 	public void render() {

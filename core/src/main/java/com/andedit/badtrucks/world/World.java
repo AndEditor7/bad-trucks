@@ -5,6 +5,7 @@ import static com.badlogic.gdx.math.MathUtils.floor;
 
 import com.andedit.badtrucks.chunk.Chunk;
 import com.andedit.badtrucks.handles.Shaders;
+import com.andedit.badtrucks.handles.TexLib;
 import com.andedit.badtrucks.utils.Camera;
 import com.andedit.badtrucks.utils.FastNoise;
 import com.badlogic.gdx.Gdx;
@@ -23,6 +24,9 @@ public class World implements Disposable
 	public static final int LENGTH = SIZE*Chunk.SIZE;
 	public static final int MASK = SIZE-1;
 	
+	//public static final int   iOrigin = LENGTH/2;
+	//public static final float fOrigin = iOrigin;
+	
 	public final Chunk[][] chunks;
 	public final float[][] map;
 	
@@ -34,10 +38,8 @@ public class World implements Disposable
 		
 		for (int x = 0; x < LENGTH; x++)
 		for (int z = 0; z < LENGTH; z++) {
-			//map[x][z] =  FastNoise.getPerlin(1337, 0.06f*x, 0.06f*z)*7f; // 7f
-			//map[x][z] += FastNoise.getPerlin(2345, 0.02f*x, 0.02f*z)*20f; // 20f
-			map[x][z] =  FastNoise.getPerlin(1337, x/6f, z/6f)*8f; // 7f
-			map[x][z] += FastNoise.getPerlin(2345, x/12f, z/12f)*16f; // 20f
+			map[x][z] =  FastNoise.getPerlin(1337, 0.06f*x, 0.06f*z)*6f; // 7f
+			map[x][z] += FastNoise.getPerlin(2345, 0.015f*x, 0.015f*z)*20f; // 20f
 		}
 		
 		for (int x = 0; x < SIZE; x++)
@@ -66,7 +68,8 @@ public class World implements Disposable
 		
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		indices.bind();
-		Shaders.bind(cam.combined);
+		TexLib.grass.bind();
+		Shaders.bind(cam);
 		for (int x = 0; x < SIZE; x++)
 		for (int z = 0; z < SIZE; z++) {
 			Chunk chunk = chunks[x][z];
@@ -79,10 +82,7 @@ public class World implements Disposable
 	
 	/** Get height-map. */
 	public float getHeight(int x, int z) {
-		if (x < 0 || x >= LENGTH || z < 0 || z >= LENGTH)
-			return 0f;
-		
-		return map[x][z];
+		return map[x < 0 ? 0 : (x >= LENGTH ? LENGTH-1 : x)][z < 0 ? 0 : (z >= LENGTH ? LENGTH-1 : z)];
 	}
 	
 	/** Get height-map without interpolation. */

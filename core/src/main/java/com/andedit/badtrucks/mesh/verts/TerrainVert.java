@@ -6,15 +6,16 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 // Needs update comments after attribute change.
 public final class TerrainVert 
 {
-	/** 3 Position, 1 Color */
+	/** 3 Position */
 	public static final VertexAttributes attributes = new VertexAttributes(
 				VertexAttribute.Position(),
-				VertexAttribute.ColorPacked()
+				VertexAttribute.Normal()
+				//VertexAttribute.ColorPacked()
 			);
 	
-	/** 16 bytes in a single vertex with 4 float components. */ 
+	/** 12 bytes in a single vertex with 3 float components. */ 
 	public static final int byteSize = attributes.vertexSize;
 	
-	/** 4 floats in a single vertex. */ 
+	/** 3 floats in a single vertex. */ 
 	public static final int floatSize = byteSize/Float.BYTES;
 }

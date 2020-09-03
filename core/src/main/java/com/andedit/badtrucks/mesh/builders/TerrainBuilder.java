@@ -33,10 +33,17 @@ public class TerrainBuilder extends MeshBuilder
 		v2----v3
 	*/
 	public void rect(VertInfo v1, VertInfo v2, VertInfo v3, VertInfo v4) {
-		vertexs.add(v1.x, v1.y, v1.z, v1.c);
-		vertexs.add(v2.x, v2.y, v2.z, v2.c);
-		vertexs.add(v3.x, v3.y, v3.z, v3.c);
-		vertexs.add(v4.x, v4.y, v4.z, v4.c);
+		vertexs.add(v1.xPos, v1.yPos, v1.zPos);
+		vertexs.add(v1.xNor, v1.yNor, v1.zNor);
+		
+		vertexs.add(v2.xPos, v2.yPos, v2.zPos);
+		vertexs.add(v2.xNor, v2.yNor, v2.zNor);
+		
+		vertexs.add(v3.xPos, v3.yPos, v3.zPos);
+		vertexs.add(v3.xNor, v3.yNor, v3.zNor);
+		
+		vertexs.add(v4.xPos, v4.yPos, v4.zPos);
+		vertexs.add(v4.xNor, v4.yNor, v4.zNor);
 	}
 	
 	@Override
@@ -45,14 +52,18 @@ public class TerrainBuilder extends MeshBuilder
 	}
 	
 	public static class VertInfo {
-		public float x, y, z;
-		public float c;
+		public float xPos, yPos, zPos;
+		public float xNor, yNor, zNor;
+		//public float c;
 		
 		public void set(final VertInfo vert) {
-			x = vert.x;
-			y = vert.y;
-			z = vert.z;
-			c = vert.c;
+			xPos = vert.xPos;
+			yPos = vert.yPos;
+			zPos = vert.zPos;
+			xNor = vert.xNor;
+			yNor = vert.yNor;
+			zNor = vert.zNor;
+			//c = vert.c;
 		}
 	}
 }

@@ -2,6 +2,7 @@ package com.andedit.badtrucks;
 
 import com.andedit.badtrucks.handles.Inputs;
 import com.andedit.badtrucks.handles.Shaders;
+import com.andedit.badtrucks.handles.TexLib;
 import com.andedit.badtrucks.utils.Util;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -10,8 +11,13 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.ShaderProgramLoader;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
+import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -96,11 +102,19 @@ public class Main extends Game
 		final FileHandleResolver resolver = new InternalFileHandleResolver();
 		asset = new AssetManager(resolver);
 		asset.setLoader(ShaderProgram.class, new ShaderProgramLoader(resolver));
+		asset.setLoader(Texture.class, new TextureLoader(resolver));
 		
+		TextureParameter texRepeat = new TextureParameter();
+		texRepeat.wrapU = TextureWrap.Repeat;
+		texRepeat.wrapV = TextureWrap.Repeat;
+		texRepeat.magFilter = TextureFilter.Linear;
+		texRepeat.minFilter = TextureFilter.Linear;
 		asset.load("shaders/terrain.vert", ShaderProgram.class);
+		asset.load("textures/grass.png", Texture.class, texRepeat);
 	}
 	
 	private void getAssets() {
 		Shaders.getShader(asset);
+		TexLib.grass = asset.get("textures/grass.png", Texture.class);
 	}
 }

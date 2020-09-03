@@ -20,9 +20,9 @@ public final class VBO implements Vertex
 	private final ByteBuffer byteBuffer;
 	private int bufferHandle = -1;
 
-	public VBO(final FloatArray array, int numVerts, final VertContext context) {
+	public VBO(final FloatArray array, final VertContext context) {
 		this.context = context;
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * numVerts);
+		byteBuffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * (array.size/context.getAttrsSize()));
 		buffer = byteBuffer.asFloatBuffer();
 		
 		BufferUtils.copy(array.items, byteBuffer, array.size, 0);
