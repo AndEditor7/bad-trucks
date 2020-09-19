@@ -18,7 +18,7 @@ public class Cam3D
 		this.cam = cam;
 	}
 	
-	public void move() {
+	public void move(boolean isFocus) {
 		final float delta = Gdx.graphics.getDeltaTime();
 		final Input input = Gdx.input;
 		
@@ -36,7 +36,7 @@ public class Cam3D
 	    
 	    final boolean left = input.isKeyPressed(Keys.A);
 	    final boolean right = input.isKeyPressed(Keys.D);
-	    final float speed = (input.isKeyPressed(Keys.CONTROL_LEFT) ? 24.0f : 14.0f)*delta;
+	    final float speed = (input.isKeyPressed(Keys.CONTROL_LEFT) ? 32.0f : 20.0f)*delta;
 	    final float rad = cam.yaw / 180f * MathUtils.PI;
 	    float PI2 = MathUtils.PI/4.5f;
 	    

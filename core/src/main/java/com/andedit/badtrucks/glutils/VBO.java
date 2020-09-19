@@ -1,40 +1,65 @@
 package com.andedit.badtrucks.glutils;
 
 import static com.badlogic.gdx.Gdx.gl;
+import static com.badlogic.gdx.graphics.GL20.GL_ARRAY_BUFFER;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.FloatArray;
 
-/** An VertexBufferObject for static object. */
+/** An VertexBufferObject. */
 public final class VBO implements Vertex
 {
 	private final VertContext context;
-	private final FloatBuffer buffer;
-	private final ByteBuffer byteBuffer;
+	private final ByteBuffer buffer;
+	private final int glDraw;
+	private final boolean ownBuffer;
 	private int bufferHandle = -1;
+	private boolean isDirty, isBound;
 
-	public VBO(final FloatArray array, final VertContext context) {
+	/** Thread-safe constructor, but creates own buffer. */
+	public VBO(final FloatArray array, final VertContext context, final int glDraw) {
 		this.context = context;
-		byteBuffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * (array.size/context.getAttrsSize()));
-		buffer = byteBuffer.asFloatBuffer();
-		
-		BufferUtils.copy(array.items, byteBuffer, array.size, 0);
-		buffer.position(0);
-		buffer.limit(array.size);
+		this.glDraw = glDraw;
+		buffer = BufferUtils.newUnsafeByteBuffer(context.getAttrs().vertexSize * (array.size/context.getFloatSize()));
+		BufferUtils.copy(array.items, buffer, array.size, 0);
+		ownBuffer = true;
+	}
+	
+	/** Not thread-safe constructor, but shares buffer. */
+	public VBO(final ByteBuffer buffer, final VertContext context, final int glDraw) {
+		this.context = context;
+		this.glDraw = glDraw;
+		this.buffer = buffer;
+		upload();
+		gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
+		ownBuffer = false;
+	}
+	
+	@Override
+	public void setVertices(float[] vertices, int offset, int count) {
+		BufferUtils.copy(vertices, buffer, count, offset);
+		if (isBound) {
+			isDirty = false;
+			gl.glBufferData(GL_ARRAY_BUFFER, buffer.limit(), buffer, glDraw);
+		} else isDirty = true;
 	}
 
 	@Override
 	public void bind() {
 		if (isUploaded()) 
-		gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, bufferHandle);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
 		else upload();
+		isBound = true;
+		
+		if (isDirty) {
+			isDirty = false;
+			gl.glBufferData(GL_ARRAY_BUFFER, buffer.limit(), buffer, glDraw);
+		}
 		
 		final VertexAttributes attributes = context.getAttrs();
 		final ShaderProgram shader = context.getShader();
@@ -57,7 +82,8 @@ public final class VBO implements Vertex
 		for (int i = 0; i < numAttributes; ++i) {
 			shader.disableVertexAttribute(context.getLocation(i));
 		}
-		gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, 0);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
+		isBound = false;
 	}
 
 	/** Upload to GPU. */
@@ -67,11 +93,12 @@ public final class VBO implements Vertex
 		bufferHandle = gl.glGenBuffer();
 		
 		// Bind the buffer.
-		gl.glBindBuffer(GL20.GL_ARRAY_BUFFER, bufferHandle);
+		gl.glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
 		
 		// Upload the data.
-		byteBuffer.limit(buffer.limit() * Float.BYTES);
-		gl.glBufferData(GL20.GL_ARRAY_BUFFER, byteBuffer.limit(), byteBuffer, GL20.GL_STATIC_DRAW);
+		gl.glBufferData(GL_ARRAY_BUFFER, buffer.limit(), buffer, glDraw);
+		
+		isDirty = false;
 	}
 	
 	private boolean isUploaded() {
@@ -79,9 +106,9 @@ public final class VBO implements Vertex
 	}
 
 	@Override
-	public void dispose () {
+	public void dispose() {
 		if (isUploaded()) gl.glDeleteBuffer(bufferHandle);
-		BufferUtils.disposeUnsafeByteBuffer(byteBuffer);
+		if (ownBuffer) BufferUtils.disposeUnsafeByteBuffer(buffer);
 	}
 }
 

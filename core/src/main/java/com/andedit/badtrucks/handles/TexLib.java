@@ -4,5 +4,9 @@ import com.badlogic.gdx.graphics.Texture;
 
 public final class TexLib 
 {
-	public static Texture grass;
+	public static Texture 
+	grass,
+	path,
+	gravel,
+	mixed;
 }

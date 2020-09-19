@@ -15,10 +15,12 @@ public class Lwjgl3Launcher {
 	}
 
 	private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
-		Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
-		configuration.setTitle("bad-trucks");
-		configuration.setWindowedMode(800, 600);
-		configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
-		return configuration;
+		final Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		//config.enableGLDebugOutput(true, System.err);
+		config.disableAudio(true);
+		config.setTitle("bad-trucks");
+		config.setWindowedMode(1200, 900); // 800 600
+		config.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+		return config;
 	}
 }

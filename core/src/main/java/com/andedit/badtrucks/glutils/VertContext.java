@@ -10,7 +10,7 @@ public interface VertContext
 	public int getLocation(int i);
 	
 	/** @return vertexSize/Float.BYTE */
-	public default int getAttrsSize() {
-		return getAttrs().vertexSize/Float.BYTES;
+	public default int getFloatSize() {
+		return getAttrs().vertexSize>>2;
 	}
 }

@@ -12,6 +12,6 @@ public class TheMenu extends ScreenAdapter
 	
 	@Override
 	public void render(float delta) {
-		main.setScreen(main.game = new TheGame(main));
+		main.setScreen(main.game = Main.isEditor ? new TheEditor(main): new TheGame(main));
 	}
 }

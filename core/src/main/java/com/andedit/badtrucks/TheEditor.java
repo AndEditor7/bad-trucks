@@ -1,55 +1,122 @@
 package com.andedit.badtrucks;
 
-import com.andedit.badtrucks.handles.Cam3D;
-import com.andedit.badtrucks.utils.Camera;
+import com.andedit.badtrucks.handles.Inputs;
 import com.andedit.badtrucks.utils.Util;
-import com.andedit.badtrucks.world.World;
+import com.andedit.badtrucks.world.WorldEditor;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
-/** First screen of the application. Displayed after the application is created. */
-public class TheEditor extends ScreenAdapter 
+/** The world editor screen extended from TheGame screen. */
+public class TheEditor extends TheGame 
 {
-	private final Main main;
+	/** Are we rotate the camera? */
+	boolean isFocus = true;
+	final Viewport view;
 	
-	final World world;
+	boolean mode = true;
+	int index = 1;
 	
-	final Camera cam;
-	final Cam3D handle;
+	ImmediateModeRenderer20 IMR;
+	
+	WorldEditor world;
 	
 	public TheEditor(final Main main) {
-		this.main = main;
-		cam = new Camera(70f, Util.world.w, Util.world.h);
-		cam.near = 1f;
-		cam.far  = 1024f;
-		handle = new Cam3D(cam);
-		world = new World();
+		super(main);
+		view = main.stage.getViewport();
+		IMR = new ImmediateModeRenderer20(500, false, true, 0);
+		this.world = (WorldEditor)super.world;
+	}
+	
+	private float lastHeight = Float.NaN;
+	
+	private void update() {
+		if (Inputs.isKeyJustPressed(Keys.TAB)) {
+			isFocus = !isFocus;
+			if (isFocus) {
+				Gdx.input.setCursorCatched(true);
+				Inputs.resetMouse();
+			} else {
+				Gdx.input.setCursorCatched(false);
+				Gdx.input.setCursorPosition(Util.screen.w>>1, Util.screen.h>>1);
+			}
+		}
+		
+		if (Inputs.isKeyPressed(Keys.NUM_1)) {
+			index = -1;
+		} else if (Inputs.isKeyPressed(Keys.NUM_2)) {
+			index = 0;
+		} else if (Inputs.isKeyPressed(Keys.NUM_3)) {
+			index = 1;
+		}
+		
+		if (Inputs.isKeyJustPressed(Keys.F1)) {
+			mode = !mode;
+		}
+		
+		if (!isFocus) {
+			boolean up   = Gdx.input.isButtonPressed(Buttons.LEFT);
+			boolean down = Gdx.input.isButtonPressed(Buttons.RIGHT);
+			final Ray ray = cam.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+			final Vector3 pos = world.raycast(cam.position, ray.direction, lastHeight);
+			
+			if (mode) {
+				if (up || down) {
+					if (Float.isNaN(lastHeight)) lastHeight = pos.y;
+					if (pos != null) {
+						world.bumpHeights(pos.x, pos.z, 4, 16f, up ? 0.2f : (down ? -0.2f : 0f));
+					}
+				} else {
+					lastHeight = Float.NaN;
+				}
+			} else {
+				if (up || down) {
+					if (pos != null) {
+						world.paint(pos.x, pos.z, 4, 16, 1.0f, index); // 8, 32
+					}
+				}
+			}
+		}
 	}
 	
 	@Override
-	public void render(float delta) {
-		handle.move();
+	public void render(float delta) 
+	{
+		update();
+		if (isFocus) handle.move(isFocus);
 		cam.update();
 		world.render(cam);
-	}
-	
-	@Override
-	public void resize(int width, int height) {
 		
-	}
-
-	@Override
-	public void dispose() {
-		world.dispose();
+		final BitmapFont font = main.font;
+		final Batch batch = main.stage.getBatch();
+		batch.setProjectionMatrix(main.stage.getViewport().getCamera().combined);
+		batch.begin();
+		font.draw(batch, "Index: " + index, 6, 21);
+		font.draw(batch, "Mode: " + (mode ? "terrain" : "paint"), 6, 10);
+		batch.end();
 	}
 	
 	@Override
 	public void show() {
-		Gdx.input.setCursorCatched(true);
+		if (isFocus) {
+			Gdx.input.setCursorCatched(true);
+		}
 	}
 	
 	@Override
 	public void hide() {
 		Gdx.input.setCursorCatched(false);
+		main.stage.clear();
+	}
+	
+	@Override
+	public void dispose() {
+		IMR.dispose();
 	}
 }

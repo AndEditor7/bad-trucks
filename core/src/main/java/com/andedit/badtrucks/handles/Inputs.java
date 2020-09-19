@@ -6,19 +6,18 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.utils.IntArray;
 
-/** Like <code>Gdx.input</code> but faster. */
+/** Like <code>Gdx.input</code> but faster and can be override by Scene2D. */
 public final class Inputs extends InputAdapter 
 {
-	private static Inputs input;
+	private static final IntArray keysPressed = new IntArray(false, 16);
+	private static final IntArray keysJustPre = new IntArray(false, 16);
+	private static final IntArray buttPressed = new IntArray(false, 8);
+	private static final IntArray buttJustPre = new IntArray(false, 8);
 	
-	private final IntArray keysPressed = new IntArray(false, 16);
-	private final IntArray keysJustPre = new IntArray(false, 16);
+	private static final GridPoint2 
+	lastPos = new GridPoint2(), movePos = new GridPoint2(), tmp = new GridPoint2();
 	
-	private final GridPoint2 lastPos = new GridPoint2(), movePos = new GridPoint2(), tmp = new GridPoint2();
-	
-	public Inputs() {
-		input = this;
-	}
+	public static final GridPoint2 mousePos = new GridPoint2();
 	
 	public boolean keyDown (int keycode) {
 		if (!keysPressed.contains(keycode)) {
@@ -35,26 +34,44 @@ public final class Inputs extends InputAdapter
 		return false;
 	}
 	
+	public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+		if (!buttPressed.contains(button)) {
+			buttPressed.add(button);
+		}
+		if (!buttJustPre.contains(button)) {
+			buttJustPre.add(button);
+		}
+		return false;
+	}
+
+	public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+		buttPressed.removeValue(button);
+		return false;
+	}
+	
 	/** Must be called when windows has been resized. */
-	public void clear() {
+	public static void clear() {
 		keysPressed.clear();
 		keysJustPre.clear();
 	}
 	
 	/** Must be called on the end of <code>render()</code> */
-	public void clearJustPressed() {
+	public static void clearJustPressed() {
 		keysJustPre.clear();
+		buttJustPre.clear();
 	}
 	
 	@Override
 	public boolean mouseMoved (int screenX, int screenY) {
 		move(screenX, screenY);
+		mousePos.set(screenX, screenY);
 		return false;
 	}
 	
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		move(screenX, screenY);
+		mousePos.set(screenX, screenY);
 		return false;
 	}
 	
@@ -64,18 +81,17 @@ public final class Inputs extends InputAdapter
 	}
 	
 	public static GridPoint2 getMouseDelta() {
-		input.lastPos.set(0, 0);
-		input.tmp.set(input.movePos);
-		input.movePos.set(0, 0);
+		lastPos.set(0, 0);
+		tmp.set(movePos);
+		movePos.set(0, 0);
 		Gdx.input.setCursorPosition(0, 0);
-		return input.tmp;
+		return tmp;
 	}
 	
-	/** Resets the mouse's position to (0, 0). */
+	/** Resets the mouse's delta. */
 	public static void resetMouse() {
-		input.lastPos.set(0, 0);
-		input.movePos.set(0, 0);
-		Gdx.input.setCursorPosition(0, 0);
+		lastPos.set(0, 0);
+		movePos.set(0, 0);
 	}
 	
 	/** Returns whether the key has just been pressed.
@@ -84,9 +100,30 @@ public final class Inputs extends InputAdapter
 	 * @param key The key code as found in {@link Input.Keys}.
 	 * @return true if key just pressed, else false. */
 	public static boolean isKeyJustPressed(int key) {
-		final int index = findAndGetIndex(input.keysJustPre, key);
+		final int index = findAndGetIndex(keysJustPre, key);
 		if (index == -1) return false;
-		input.keysJustPre.removeIndex(index);
+		keysJustPre.removeIndex(index);
+		return true;
+	}
+	
+	/** Returns whether the key has just been pressed
+	 * constant is meaningful before version 4.0.
+	 * @param button The button button as found in button
+	 * @return true if button pressed, else false. */
+	public static boolean isButtonPressed(int button) {
+		Gdx.input.isButtonPressed(button);
+		return buttPressed.contains(button);
+	}
+	
+	/** Returns whether the key has just been pressed.
+	 *  If pressed, than remove the pressed key (will return false on next call with same key).
+	 * 
+	 * @param key The key code as found in {@link Input.Buttons}.
+	 * @return true if button just pressed, else false. */
+	public static boolean isButtonJustPressed(int button) {
+		final int index = findAndGetIndex(buttJustPre, button);
+		if (index == -1) return false;
+		buttJustPre.removeIndex(index);
 		return true;
 	}
 	
@@ -95,11 +132,11 @@ public final class Inputs extends InputAdapter
 	 * @param key The key code as found in {@link Input.Keys}.
 	 * @return true or false. */
 	public static boolean isKeyPressed(int key) {
-		return input.keysPressed.contains(key);
+		return keysPressed.contains(key);
 	}
 	
 	/** @return -1 if has'nt found. */
-	private static int findAndGetIndex(IntArray array, int key) {
+	private static int findAndGetIndex(final IntArray array, final int key) {
 		final int size = array.size;
 		final int[] ints = array.items;
 		for (int i = 0; i < size; ++i) {

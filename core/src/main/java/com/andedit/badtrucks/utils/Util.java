@@ -51,6 +51,10 @@ public final class Util
 		}
 	}
 	
+	public static float sqrt(int a) {
+		return (float)Math.sqrt(a);
+	}
+	
 	/** Convenience method that returns a FileType.Internal file handle. */
 	public static FileHandle getFile(String path) {
 		return Gdx.files.internal(path);

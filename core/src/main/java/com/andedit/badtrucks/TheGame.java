@@ -4,13 +4,14 @@ import com.andedit.badtrucks.handles.Cam3D;
 import com.andedit.badtrucks.utils.Camera;
 import com.andedit.badtrucks.utils.Util;
 import com.andedit.badtrucks.world.World;
+import com.andedit.badtrucks.world.WorldEditor;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 
 /** First screen of the application. Displayed after the application is created. */
 public class TheGame extends ScreenAdapter 
 {
-	private final Main main;
+	final Main main;
 	
 	final World world;
 	
@@ -20,15 +21,20 @@ public class TheGame extends ScreenAdapter
 	public TheGame(final Main main) {
 		this.main = main;
 		cam = new Camera(70f, Util.world.w, Util.world.h);
-		cam.near = 1f;
+		cam.near = 2f;
 		cam.far  = 1024f;
+		cam.position.set(World.LENGTH/2, 24, World.LENGTH/2);
 		handle = new Cam3D(cam);
-		world = new World();
+		if (Main.isEditor) {
+			world = new WorldEditor();
+		} else {
+			world = new World(true);
+		}
 	}
 	
 	@Override
 	public void render(float delta) {
-		handle.move();
+		handle.move(false);
 		cam.update();
 		world.render(cam);
 	}

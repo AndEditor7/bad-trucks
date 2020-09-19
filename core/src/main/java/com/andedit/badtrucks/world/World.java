@@ -2,53 +2,70 @@ package com.andedit.badtrucks.world;
 
 import static com.badlogic.gdx.math.Interpolation.smooth;
 import static com.badlogic.gdx.math.MathUtils.floor;
+import static com.badlogic.gdx.math.MathUtils.clamp;
+
+import java.util.Random;
 
 import com.andedit.badtrucks.chunk.Chunk;
-import com.andedit.badtrucks.handles.Shaders;
-import com.andedit.badtrucks.handles.TexLib;
+import com.andedit.badtrucks.chunk.ChunkStatic;
+import com.andedit.badtrucks.mesh.verts.TerrainStatic;
+import com.andedit.badtrucks.mesh.verts.TerrainStream;
 import com.andedit.badtrucks.utils.Camera;
 import com.andedit.badtrucks.utils.FastNoise;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.IndexBufferObject;
 import com.badlogic.gdx.graphics.glutils.IndexData;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Plane;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 
 public class World implements Disposable
 {
 	/** The size of the chunks */
-	public static final int SIZE = 32;
+	public static final int SIZE = 16;
 	public static final int LENGTH = SIZE*Chunk.SIZE;
 	public static final int MASK = SIZE-1;
-	
-	//public static final int   iOrigin = LENGTH/2;
-	//public static final float fOrigin = iOrigin;
+	public static final int MASKLEN = LENGTH-1;
 	
 	public final Chunk[][] chunks;
 	public final float[][] map;
 	
-	public IndexData indices;
+	public final IndexData indices;
+	public final boolean isEditor;
 	
-	public World() {
+	public World(boolean noise) {
+		this(noise, false);
+	}
+	
+	protected World(boolean noise, boolean isEditor) {
 		this.chunks = new Chunk[SIZE][SIZE];
 		this.map = new float[LENGTH][LENGTH];
+		this.isEditor = isEditor;
 		
-		final int seed1 = MathUtils.random.nextInt(), seed2 = MathUtils.random.nextInt();
-		for (int x = 0; x < LENGTH; x++)
-		for (int z = 0; z < LENGTH; z++) {
-			map[x][z] =  FastNoise.getPerlin(seed1, 0.06f*x, 0.06f*z)*4f; // 7f
-			map[x][z] += FastNoise.getPerlin(seed2, 0.015f*x, 0.015f*z)*42f; // 24f
+		if (noise) {
+			final Random rand = MathUtils.random;
+			final int 
+			seed1 = rand.nextInt(), 
+			seed2 = rand.nextInt(),
+			seed3 = rand.nextInt();
+			for (int x = 0; x < LENGTH; x++)
+			for (int z = 0; z < LENGTH; z++) {
+				float value;
+				value =  FastNoise.getPerlin(seed1, 0.04f*x, 0.04f*z)*8f;
+				value += FastNoise.getPerlin(seed2, 0.02f*x, 0.02f*z)*16f;
+				value += FastNoise.getPerlin(seed3, 0.01f*x, 0.01f*z)*32f;
+				map[x][z] = value;
+			}
 		}
 		
+		if (!isEditor)
 		for (int x = 0; x < SIZE; x++)
 		for (int z = 0; z < SIZE; z++) {
-			chunks[x][z] = new Chunk(this, x, z);
+			chunks[x][z] = new ChunkStatic(this, x, z);
 		}
 		
-		final int len = 98304/2;
+		final int len = 98304>>1;
 		final short[] index = new short[len];
 		for (int i = 0, v = 0; i < len; i += 6, v += 4) {
 			index[i] = (short)v;
@@ -67,23 +84,28 @@ public class World implements Disposable
 		final Vector3 camPos = cam.position;
 		final Plane[] planes = cam.frustum.planes;
 		
-		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		indices.bind();
-		TexLib.grass.bind();
-		Shaders.bind(cam);
-		for (int x = 0; x < SIZE; x++)
-		for (int z = 0; z < SIZE; z++) {
+		if (isEditor) TerrainStream.bind(cam);
+		else TerrainStatic.bind(cam);
+		for(int x = 0; x < SIZE; x++)
+		for(int z = 0; z < SIZE; z++) {
 			Chunk chunk = chunks[x][z];
 			if (chunk.frust(planes))
-			chunks[x][z].render(camPos);
+				chunk.render(camPos);
 		}
 		indices.unbind();
-		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 	}
 	
 	/** Get height-map. */
 	public float getHeight(int x, int z) {
-		return map[x < 0 ? 0 : (x >= LENGTH ? LENGTH-1 : x)][z < 0 ? 0 : (z >= LENGTH ? LENGTH-1 : z)];
+		return map[clamp(x, 0, MASKLEN)][clamp(z, 0, MASKLEN)];
+	}
+	
+	/** Get height-map. */
+	public void addHeight(int x, int z, float value) {
+		if (x < 0 || x >= LENGTH || z < 0 || z >= LENGTH)
+			return;
+		map[x][z] += value;
 	}
 	
 	/** Get height-map without interpolation. */
@@ -95,7 +117,7 @@ public class World implements Disposable
 		return map[xInt][zInt];
 	}
 	
-	/** Get height-map with interpolation. */
+	/** Get height-map with smoothstep interpolation. */
     public float getHeightSmooth(float x, float z) {
         final int xInt = floor(x), zInt = floor(z);
         return smooth.apply(smooth.apply(getHeight(xInt, zInt  ), getHeight(xInt+1, zInt  ), x - xInt), 
@@ -104,14 +126,26 @@ public class World implements Disposable
         //interpolate(interpolate(lowerLeft, lowerRight, xFraction), interpolate(upperLeft, upperRight, xFraction), yFraction);
     }
     
-    /** Get height-map with lerp. */
+    /** Get height-map with linear interpolation. */
     public float getHeightLerp(float x, float z) {
-        final int xInt = floor(x), zInt = floor(z);
+        final int xInt = (int) Math.floor(x), zInt = floor(z);
         return MathUtils.lerp(MathUtils.lerp(getHeight(xInt, zInt  ), getHeight(xInt+1, zInt  ), x - xInt), 
         					  MathUtils.lerp(getHeight(xInt, zInt+1), getHeight(xInt+1, zInt+1), x - xInt), z - zInt);
 
         //interpolate(interpolate(lowerLeft, lowerRight, xFraction), interpolate(upperLeft, upperRight, xFraction), yFraction);
     }
+    
+    // calculate light.
+    private static final Vector3 vec = new Vector3();
+    private static final Vector3 dir = new Quaternion().setEulerAngles(30, -73, 0).transform(new Vector3(0,0,1));
+	public float calcLight(int x, int z) {
+		final float dot;
+		dot = vec.set(getHeight(x-1, z)-getHeight(x+1, z), 2f, 
+					  getHeight(x, z-1)-getHeight(x, z+1)).nor().dot(dir);
+		return MathUtils.lerp(Math.max(dot, 0.2f), 1.0f, 0.25f);
+	}
+	
+	
 
 	@Override
 	public void dispose() {
